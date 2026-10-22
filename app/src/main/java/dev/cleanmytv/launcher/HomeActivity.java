@@ -16,6 +16,12 @@ import java.util.*;
 
 /** Offline TV home: no accessibility helpers, background services, or network polling. */
 public final class HomeActivity extends Activity {
+    private ImageView rotatingWallpaper;
+    private int wallpaperNumber = 1;
+    private boolean wallpaperVisible, wallpaperLoading;
+    private final Handler wallpaperTimer = new Handler(Looper.getMainLooper());
+    private final Runnable wallpaperChange = this::rotateWallpaper;
+
     final ArrayList<App> apps = new ArrayList<>();
     final ArrayList<View> topButtons = new ArrayList<>();
     RecyclerView grid;
@@ -44,10 +50,11 @@ public final class HomeActivity extends Activity {
         lastPackage=getPreferences(0).getString("lastPackage", "");
         loadApps();
         stage=new FrameLayout(this); stage.setBackgroundColor(Color.BLACK); setContentView(stage);
-        try (java.io.InputStream input=getAssets().open("wallpaper.jpg")) {
+        try (java.io.InputStream input=getAssets().open("wall-1.jpg")) {
             Bitmap photo=BitmapFactory.decodeStream(input);
             if(photo==null) throw new java.io.IOException("Unreadable wallpaper");
             ImageView wallpaper=new ImageView(this);
+            rotatingWallpaper=wallpaper;
             wallpaper.setScaleType(ImageView.ScaleType.CENTER_CROP);
             wallpaper.setImageBitmap(photo);
             wallpaper.setFocusable(false);
@@ -101,6 +108,14 @@ public final class HomeActivity extends Activity {
             App a=available.remove(dock[i]);
             if(a!=null) apps.add(new App(a.pkg,i<labels.length?labels[i]:a.label,a.intent,a.image));
             else apps.add(new App(dock[i],i<labels.length?labels[i]:dock[i],null,null));
+        }
+        String[] secondRow=getResources().getStringArray(R.array.second_row_apps);
+        String[] secondLabels=getResources().getStringArray(R.array.second_row_labels);
+        for(int i=0;i<secondRow.length;i++) {
+            App a=available.remove(secondRow[i]);
+            String label=i<secondLabels.length?secondLabels[i]:secondRow[i];
+            if(a!=null) apps.add(new App(a.pkg,label,a.intent,a.image));
+            else apps.add(new App(secondRow[i],label,null,null));
         }
         ArrayList<App> rest=new ArrayList<>(available.values());
         rest.sort((a,b)->a.label.compareToIgnoreCase(b.label)); apps.addAll(rest);
@@ -256,5 +271,42 @@ public final class HomeActivity extends Activity {
             });
         }
     }
+
+    @Override protected void onStart() {
+        super.onStart();
+        wallpaperVisible = true;
+        wallpaperTimer.removeCallbacks(wallpaperChange);
+        wallpaperTimer.postDelayed(wallpaperChange, 60000L);
+    }
+
+    @Override protected void onStop() {
+        wallpaperVisible = false;
+        wallpaperTimer.removeCallbacks(wallpaperChange);
+        super.onStop();
+    }
+
+    private void rotateWallpaper() {
+        if (!wallpaperVisible || wallpaperLoading || rotatingWallpaper == null) return;
+        wallpaperLoading = true;
+        final int next = wallpaperNumber % 7 + 1;
+        new Thread(() -> {
+            Bitmap decoded = null;
+            try (java.io.InputStream input = getAssets().open("wall-" + next + ".jpg")) {
+                decoded = BitmapFactory.decodeStream(input);
+            } catch (java.io.IOException ignored) { }
+            final Bitmap photo = decoded;
+            wallpaperTimer.post(() -> {
+                wallpaperLoading = false;
+                if (!wallpaperVisible) return;
+                if (photo != null) {
+                    rotatingWallpaper.setImageBitmap(photo);
+                    wallpaperNumber = next;
+                }
+                wallpaperTimer.removeCallbacks(wallpaperChange);
+                wallpaperTimer.postDelayed(wallpaperChange, 60000L);
+            });
+        }, "wallpaper-loader").start();
+    }
+
     @Override public void onBackPressed() { focusApp(0); }
 }
