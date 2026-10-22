@@ -1,0 +1,13 @@
+<resources>
+    <integer name="columns">4</integer>
+    <string name="greeting">Welcome home</string>
+    <string-array name="dock_apps">
+        <item>tv.ifvod.classic</item>
+        <item>com.xiaodianshi.tv.yst</item>
+        <item>com.google.android.youtube.tv</item>
+        <item>com.netflix.ninja</item>
+    </string-array>
+    <string-array name="dock_labels">
+        <item>爱壹帆</item><item>Bilibili</item><item>YouTube</item><item>Netflix</item>
+    </string-array>
+</resources>

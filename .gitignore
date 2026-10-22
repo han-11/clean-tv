@@ -1,0 +1,6 @@
+.tools/
+.gradle/
+.gradle-cache/
+local.properties
+**/build/
+shots/
