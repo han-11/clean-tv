@@ -6,3 +6,4 @@ local.properties
 shots/
 .DS_Store
 *.before-*
+__pycache__/

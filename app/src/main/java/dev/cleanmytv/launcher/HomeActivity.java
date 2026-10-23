@@ -17,7 +17,8 @@ import java.util.*;
 /** Offline TV home: no accessibility helpers, background services, or network polling. */
 public final class HomeActivity extends Activity {
     private ImageView rotatingWallpaper;
-    private int wallpaperNumber = 1;
+    private int wallpaperNumber = 0;
+    private String[] wallpaperFiles = {"wall-1.jpg"};
     private boolean wallpaperVisible, wallpaperLoading;
     private final Handler wallpaperTimer = new Handler(Looper.getMainLooper());
     private final Runnable wallpaperChange = this::rotateWallpaper;
@@ -50,7 +51,11 @@ public final class HomeActivity extends Activity {
         lastPackage=getPreferences(0).getString("lastPackage", "");
         loadApps();
         stage=new FrameLayout(this); stage.setBackgroundColor(Color.BLACK); setContentView(stage);
-        try (java.io.InputStream input=getAssets().open("wall-1.jpg")) {
+        try {
+            String[] found = WallpaperCatalog.find(getAssets().list(""));
+            if (found.length > 0) wallpaperFiles = found;
+        } catch (java.io.IOException ignored) { }
+        try (java.io.InputStream input=getAssets().open(wallpaperFiles[0])) {
             Bitmap photo=BitmapFactory.decodeStream(input);
             if(photo==null) throw new java.io.IOException("Unreadable wallpaper");
             ImageView wallpaper=new ImageView(this);
@@ -286,21 +291,21 @@ public final class HomeActivity extends Activity {
     }
 
     private void rotateWallpaper() {
-        if (!wallpaperVisible || wallpaperLoading || rotatingWallpaper == null) return;
+        if (!wallpaperVisible || wallpaperLoading || rotatingWallpaper == null || wallpaperFiles.length < 2) return;
         wallpaperLoading = true;
-        final int next = wallpaperNumber % 7 + 1;
+        final int next = (wallpaperNumber + 1) % wallpaperFiles.length;
         new Thread(() -> {
             Bitmap decoded = null;
-            try (java.io.InputStream input = getAssets().open("wall-" + next + ".jpg")) {
+            try (java.io.InputStream input = getAssets().open(wallpaperFiles[next])) {
                 decoded = BitmapFactory.decodeStream(input);
             } catch (java.io.IOException ignored) { }
             final Bitmap photo = decoded;
             wallpaperTimer.post(() -> {
                 wallpaperLoading = false;
                 if (!wallpaperVisible) return;
+                wallpaperNumber = next;
                 if (photo != null) {
                     rotatingWallpaper.setImageBitmap(photo);
-                    wallpaperNumber = next;
                 }
                 wallpaperTimer.removeCallbacks(wallpaperChange);
                 wallpaperTimer.postDelayed(wallpaperChange, 60000L);

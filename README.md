@@ -18,11 +18,29 @@ Configure app ordering in app/src/main/res/values/config.xml.
 
 ## Wallpapers
 
-Seven bundled photos live in app/src/main/assets/wall-1.jpg through wall-7.jpg.
-They rotate in order every 60 seconds while the launcher is visible.
+Wallpaper photos are discovered automatically in app/src/main/assets.
+Supported names are wall-N or wp-N with jpg, jpeg, png, or webp extensions.
+They rotate in numeric order (wall photos first, then wp photos) every 60 seconds while the launcher is visible.
 Rotation pauses when another app covers the launcher.
-Replace those images and rebuild to change the photos.
+Add or replace those images and rebuild to change the photos; no Java edits are needed.
 The existing overlay and image cropping remain unchanged.
+
+To import the complete set of 64 photos from the user's Mac:
+
+    python3 import-wallpapers.py "$HOME/Downloads/wallpapers" --count 64 --replace-set
+
+The importer resizes copies to at most 1920 pixels using macOS sips. It validates
+the full numbered set and prepares every photo before replacing app assets.
+Existing wallpaper assets are backed up outside the project on the Desktop.
+The original Downloads photos, logo resources, app order, and Home helper are
+untouched. This command replaces the previous seven with the complete set of
+64, which already includes those original photos. Rebuild and install afterward.
+
+Validation for automatic discovery: the debug build, APK signature check, 13
+Java unit tests (Home handling and wallpaper selection), and four Python importer
+tests passed. Importer tests use a simulated converter to check file preservation;
+the real macOS sips conversion and the user's 64-photo APK run on the Mac.
+Run importer tests with: python3 -m unittest discover -s tests
 
 ## Build and test
 
