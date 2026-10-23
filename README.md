@@ -92,40 +92,14 @@ The service cannot read window contents, takes no screenshots, uses no network
 access, and makes no system package changes. It receives key events solely to
 handle Home; all other keys are forwarded.
 
-### Optional startup launching
-
-Physical Home, volume repeats, Back, Input, Settings and app buttons have been
-reported working on the user's TCL C755, including Home after a reboot.
-Startup launching still requires a separate real-device test.
-
-In the helper screen, select Enable startup launching (next reboot). It defaults
-off and requires the Home accessibility helper to stay enabled. Restart the TV
-using its Restart command, rather than just putting it in standby. Google TV may
-appear briefly before CleanMyTV opens.
-
-The service waits ten seconds after connecting, then opens CleanMyTV once per
-boot when the display is awake and unlocked. It uses Android's boot counter;
-missing access leaves startup disabled. It does not replace the boot animation
-or change the system launcher. Retries are bounded to two minutes and the first
-five minutes of device uptime. A late reconnect or ordinary standby wake does
-not take over the screen. Pressing Home first also cancels a pending startup
-launch for that boot. No boot receiver or new permissions are added.
-
-Turn off startup launching in the same helper screen to retain Home remapping
-without startup launching. An adb rollback is also available:
-
-    adb -s DEVICE_SERIAL shell am start -n dev.cleanmytv.launcher/.HomeHelperSettingsActivity --ez disable_startup true
-
-Turning off the Home helper stops both functions. If firmware rejects startup
-launching, physical Home remains available; do not disable any system packages.
+Automatic launching after TV startup is deliberately a separate, unimplemented
+step. Confirm Home and remote behaviour first. Then test a reboot with this
+helper enabled to establish that Home access and normal TV controls recover.
 
 Development checks: run :app:testDebugUnitTest and :app:assembleDebug with
 Gradle 8.7. Unit tests exercise key forwarding, cancelled presses, and repeats;
 they cannot establish how TCL firmware routes physical Home events.
-The original helper's debug build and seven unit tests passed in the cloud development environment.
-The startup update's debug build, APK signature verification, and all 13 unit
-tests also passed in the cloud environment. The six additional tests cover
-startup opt-out, boot identity, duplicate launches, and late reconnections.
+The debug build and seven unit tests passed in the cloud development environment.
 Lint reports three pre-existing errors, verified against unchanged main:
 MissingTvBanner and two WrongConstant font-style errors in HomeActivity.
 Those are not introduced or suppressed by this helper.

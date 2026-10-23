@@ -1,4 +1,4 @@
 <resources>
     <string name="home_helper_summary">Optional Home button shortcut</string>
-    <string name="home_helper_description">Opens CleanMyTV on a Home button tap, if the TV sends Home events to accessibility services. Optional startup launching opens it once after reboot. Does not read screen contents or change system packages. Other keys pass through, but some TCL firmware loses held-key repeats while key filtering is enabled. Turn this service off if volume, inputs, or other remote controls change.</string>
+    <string name="home_helper_description">Opens CleanMyTV on a Home button tap, if the TV sends Home events to accessibility services. Does not read screen contents or change system packages. Other keys pass through, but some TCL firmware loses held-key repeats while key filtering is enabled. Turn this service off if volume, inputs, or other remote controls change.</string>
 </resources>

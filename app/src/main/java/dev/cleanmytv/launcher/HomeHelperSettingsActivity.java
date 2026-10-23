@@ -33,7 +33,7 @@ public final class HomeHelperSettingsActivity extends Activity {
             + "Home holds and double presses are not separately mapped. "
             + "Test held-volume repeats, Input, Settings and app buttons after enabling. "
             + "If any remote behaviour changes, turn this helper off in Android Accessibility settings. "
-            + "Optional startup launching opens CleanMyTV once after reboot, when the screen is awake.");
+            + "Startup launching is not part of this test.");
         content.addView(explanation);
         status = new TextView(this);
         status.setPadding(0, padding / 2, 0, padding / 2);
@@ -48,24 +48,11 @@ public final class HomeHelperSettingsActivity extends Activity {
             HomeKeyService.turnOff(this);
             status.postDelayed(this::updateStatus, 300);
         });
-        button(content, "Enable startup launching (next reboot)", () -> {
-            if (!HomeKeyService.setStartup(this, true))
-                Toast.makeText(this, "Boot counter unavailable; startup remains off", Toast.LENGTH_LONG).show();
-            updateStatus();
-        });
-        button(content, "Turn off startup launching", () -> {
-            HomeKeyService.setStartup(this, false);
-            updateStatus();
-        });
         button(content, "Android accessibility settings", this::openAccessibility);
         button(content, "Open CleanMyTV", () -> startActivity(new Intent(this, HomeActivity.class)));
         enable.requestFocus();
         if (getIntent().getBooleanExtra("disable_home_helper", false)) {
             HomeKeyService.turnOff(this);
-            updateStatus();
-        }
-        if (getIntent().getBooleanExtra("disable_startup", false)) {
-            HomeKeyService.setStartup(this, false);
             updateStatus();
         }
     }
@@ -91,9 +78,6 @@ public final class HomeHelperSettingsActivity extends Activity {
         status.setText(!armed ? "Helper is off."
             : HomeKeyService.isConnected() ? "Helper is connected. Test the physical Home button."
             : "Not connected. Enable CleanMyTV Home helper in Android Accessibility settings.");
-        boolean startup = getSharedPreferences(HomeKeyService.PREFS, MODE_PRIVATE)
-            .getBoolean(HomeKeyService.STARTUP, false);
-        status.append("\nStartup: " + (startup ? "On (requires Home helper)" : "Off"));
     }
 
     @Override protected void onResume() {
