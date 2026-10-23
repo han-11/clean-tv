@@ -6,7 +6,7 @@
         <intent><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent>
         <intent><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent>
     </queries>
-    <application android:label="CleanMyTV" android:allowBackup="false" android:supportsRtl="true" android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
+    <application android:icon="@drawable/tv_logo" android:banner="@drawable/tv_logo" android:label="CleanMyTV" android:allowBackup="false" android:supportsRtl="true" android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
         <activity android:name=".HomeHelperSettingsActivity" android:label="CleanMyTV Home helper"
             android:exported="true" android:screenOrientation="landscape"/>
         <service android:name=".HomeKeyService" android:label="CleanMyTV Home helper"
